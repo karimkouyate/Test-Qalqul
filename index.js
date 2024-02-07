@@ -6,6 +6,7 @@ const redis = require('redis');
 const socket = require("socket.io");
 const authRoutes = require("./routes/auth");
 const chatsRoutes = require("./routes/chats");
+const usersRoutes = require("./routes/users");
 const { authMiddleware } = require("./controllers/middleware/authMiddleware");
 require("dotenv").config();
 
@@ -87,8 +88,22 @@ setupKafkaConsumer('chat-events', async function (message) {
   }
 });
 
-global.rooms = new Map();
 
+async function publishOnlineUsers(roomId) {
+  try {
+    const client = redis.createClient();
+    await client.connect();
+    const users = await client.lRange(`connected-users${roomId}`, 0, -1);
+    const uniqueUsers = [...new Set(users)];
+    await client.publish("online-users", JSON.stringify(uniqueUsers));
+    console.log('Online users published:', uniqueUsers);
+  } catch (err) {
+    console.error('Redis Error:', err);
+  }
+}
+
+global.rooms = new Map();
+global.onlineUsers = new Map();
 io.on("connection", (socket) => {
   global.chatSocket = socket;
 
@@ -96,7 +111,9 @@ io.on("connection", (socket) => {
     rooms.set(roomId, socket.id);
   });
 
-  socket.on('join-room', (roomId) => {
+  socket.on('join-room', async(userId, roomId) => {
+    console.log(userId, roomId);
+    onlineUsers.set(socket.id, userId);
     socket.join(roomId);
     console.log(`Client joined room ${roomId}`);
     io.to(roomId).emit('user-joined', { roomId });
@@ -117,10 +134,21 @@ io.on("connection", (socket) => {
         console.log('User join room sent to Kafka on chat-events topics :', data);
       }
     });
+
+    const client = redis.createClient();
+    await client.connect();
+    if (client.isOpen) {
+      if(onlineUsers.get(socket.id)){
+        client.rPush(`connected-users${roomId}`, onlineUsers.get(socket.id));
+      }
+      publishOnlineUsers(roomId);
+    }
+
   });
 
-  socket.on('leave-room', (roomId) => {
+  socket.on('leave-room', async(roomId) => {
     socket.leave(roomId);
+    onlineUsers.delete(socket.id);
     console.log(`Client left room ${roomId}`);
     io.to(roomId).emit('user-left', { roomId });
 
@@ -140,6 +168,15 @@ io.on("connection", (socket) => {
         console.log('Message sent to Kafka:', data);
       }
     });
+
+    const client = redis.createClient();
+    await client.connect();
+    if (client.isOpen) {
+      if( onlineUsers.get(socket.id)){
+        client.lRem(`connected-users${roomId}`, 0 , onlineUsers.get(socket.id));
+      }
+      publishOnlineUsers(roomId);
+    }
   });
 
   socket.on("message", (data) => {
@@ -177,3 +214,4 @@ io.on("connection", (socket) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/chats", authMiddleware,  chatsRoutes);
+app.use("/api/users", authMiddleware,  usersRoutes);
