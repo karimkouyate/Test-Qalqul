@@ -12,30 +12,6 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://127.0.0.1:5000/api/auth/login",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"auth",
-						"login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "login",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"url": {
 					"raw": "http://127.0.0.1:5000/api/auth/register",
 					"protocol": "http",
 					"host": [
@@ -49,6 +25,45 @@
 						"api",
 						"auth",
 						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\" : \"ousmane\",\r\n    \"password\" : \"password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"auth",
+						"login"
 					]
 				}
 			},
@@ -197,6 +212,37 @@
 						"chats",
 						"65c2b6e322c1df3aec6765a4",
 						"messages"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get online users",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWMyYWIwYTJlMjQ0Zjc1MzRiODM3ZWIiLCJpYXQiOjE3MDcyOTg2NzYsImV4cCI6MTcwNzMwMjI3Nn0.4UBmTTgqkx2f9OF4Jt5N2_tJm625KAoxJyqgIodS4-c",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/users/65c2b6e322c1df3aec6765a4/online",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"users",
+						"65c2b6e322c1df3aec6765a4",
+						"online"
 					]
 				}
 			},
