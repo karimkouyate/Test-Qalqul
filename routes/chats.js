@@ -1,3 +1,4 @@
+const { authMiddleware } = require("../controllers/middleware/authMiddleware");
 const { getAvailableChatRooms, addChatRoom, getSpecificRoomRecentMessages, addMessageToRoom } = require("../controllers/roomController");
 
 const router = require("express").Router();

@@ -24,42 +24,13 @@ module.exports.addChatRoom = async (req, res, next) => {
 
 module.exports.getSpecificRoomRecentMessages = async (req, res, next) => {
   try {
-    const { name } = req.body;
-    const chatRoom = new Room({ name });
-    await chatRoom.save();
+   
     const { id } = req.params;
-
-    const room = await Room.findById(id).populate({
-      path: "messages",
-      options: {
-        sort: { createdAt: -1 }, // Trie par ordre décroissant de l'horodatage
-        limit: 10, // Limite le nombre de messages à 10
-      },
-    });
-
-    if (!room) {
-      return res.status(404).json({ message: "Room not found" });
-    }
-
     const client = redis.createClient();
     await client.connect();
-    const roomRecentMessages = await client.hGetAll('room:123');
-    console.log(JSON.stringify(roomRecentMessages, null, 2));
-
-    return res.status(200).json(room.messages);
-
-    // const client = redis.createClient();
-    // await client.connect();
-    // console.log(client.isOpen); // this is true
-    // client.lrange(`chat:${id}`, 0, -1, (err, messages) => {
-    //     if (err) throw err;
-    //     return res.json(messages);
-    // })
-
-
-
-
-
+    const roomRecentMessages =  await client.lRange(`room-${id}`, 0, 5);
+    const parsedData = roomRecentMessages.map(item => JSON.parse(item));
+    return res.status(200).json(parsedData);
   } catch (error) {
     res.status(500).send(error.message);
   }
