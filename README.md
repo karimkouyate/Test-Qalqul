@@ -53,8 +53,9 @@ To consume messages:
 
 ## Redis
 
--Install Redis for windows msi version[here](https://github.com/tporadowski/redis/releases)
--launch redis server on cmd
+- Install Redis for windows msi version [here](https://github.com/tporadowski/redis/releases)
+
+- Launch redis server on cmd : redis-server
 
 
 ## Installation Guide
@@ -72,7 +73,7 @@ git clone https://github.com/karimkouyate/Test-Qalqul
 
 Now install the dependencies
 ```shell
-cd server
+cd Test-Qalqul
 yarn or npm install
 ```
 We are almost done, Now just start the development server.
